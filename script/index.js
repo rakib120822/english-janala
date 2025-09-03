@@ -108,68 +108,84 @@ const wordDetailDisplay = (word) => {
 
 // my_modal_4.showModal()
 const displayLevelWord = (words) => {
-    
-    const wordContainer = document.getElementById("word-container");
-    wordContainer.innerHTML = "";
+  const wordContainer = document.getElementById("word-container");
+  wordContainer.innerHTML = "";
 
-    
-
-    if (words.length === 0) {
-        wordContainer.innerHTML = `
+  if (words.length === 0) {
+    wordContainer.innerHTML = `
         <div class="text-center  col-span-full space-y-6 py-10">
         <img src="./assets/alert-error.png" class="mx-auto"/>
               <p class="text-xl font-medium text-gray-400 font-bangla">এই Lesson এ এখনো কোন Vocabulary যুক্ত করা হয়নি।</p>
               <h2 class="font-bold text-4xl font-bangla">নেক্সট Lesson এ যান</h2>
           </div>
-       `
-        manageSpinner(false)
-        return 
-    }
-    words.forEach(word => {
-        
-        const card = document.createElement("div");
-       
+       `;
+    manageSpinner(false);
+    return;
+  }
+  words.forEach((word) => {
+    const card = document.createElement("div");
 
-        card.innerHTML = `
+    card.innerHTML = `
             <div class="bg-white text-center rounded-xl shadow-sm py-10 px-4" >
-            <h2 class="font-bold text-2xl">${word.word? word: "শব্দ পাওয়া যায় নি"}</h2>
+            <h2 class="font-bold text-2xl">${
+              word.word ? word.word : "শব্দ পাওয়া যায় নি"
+            }</h2>
             <p class="font-medium my-2">Meaning/Pronunciation</p>
-            <div class="text-2xl font-semibold font-bangla">"${word.meaning? word.meaning : "অর্থ পাওয়া যায় নি"} / ${word.pronunciation? word.pronunciation : "Pronunciation পাওয়া যায় নি"}"</div>
+            <div class="text-2xl font-semibold font-bangla">"${
+              word.meaning ? word.meaning : "অর্থ পাওয়া যায় নি"
+            } / ${
+      word.pronunciation ? word.pronunciation : "Pronunciation পাওয়া যায় নি"
+    }"</div>
             <div class="flex justify-between items-center">
               
-              <button onclick="loadWordDetail(${word.id})" class="btn bg-[#1a91ff1a] hover:bg-[#1a91ffcc]"><i class="fa-solid fa-circle-info"></i></button>
+              <button onclick="loadWordDetail(${
+                word.id
+              })" class="btn bg-[#1a91ff1a] hover:bg-[#1a91ffcc]"><i class="fa-solid fa-circle-info"></i></button>
               <button class="btn bg-[#1a91ff1a] hover:bg-[#1a91ffcc]"><i class="fa-solid fa-volume-high"></i></button>
             </div>
           </div>
-        `
+        `;
 
-        wordContainer.append(card)
-    })
-    manageSpinner(false)
-}
-
+    wordContainer.append(card);
+  });
+  manageSpinner(false);
+};
 
 const displayLesson = (data) => {
+  const lessons = data.data;
 
-    const lessons = data.data;
-    
-    const levelContainer = document.getElementById("level-container");
-    levelContainer.innerHTML = "";
- 
-    for(const lesson of lessons){
+  const levelContainer = document.getElementById("level-container");
+  levelContainer.innerHTML = "";
 
-        const btnDiv = document.createElement("div");
-        
+  for (const lesson of lessons) {
+    const btnDiv = document.createElement("div");
 
-        btnDiv.innerHTML = `
+    btnDiv.innerHTML = `
             <button  id="lesson-btn-${lesson.level_no}" onClick="loadLevelWord(${lesson.level_no})" class="btn btn-outline btn-primary lesson-btn" href="">
             <i class="fa-solid fa-book-open"></i> Lesson ${lesson.level_no}
             </button>
-        `
+        `;
 
-        levelContainer.appendChild(btnDiv)
-        
-    };
-}
+    levelContainer.appendChild(btnDiv);
+  }
+};
 
-loadLessons()
+loadLessons();
+
+document.getElementById("btn-search").addEventListener("click", () => {
+  const input = document.getElementById("input-search");
+  const searchWord = input.value.trim().toLowerCase();
+
+  removeActive();
+
+  fetch("https://openapi.programming-hero.com/api/words/all")
+    .then((res) => res.json())
+    .then((data) => {
+      const allWords = data.data;
+      const filterWord = allWords.filter((word) => {
+        return word.word.toLowerCase().includes(searchWord);
+      });
+
+      displayLevelWord(filterWord);
+    });
+});
